@@ -1,4 +1,3 @@
-import os
 import subprocess
 import time
 
@@ -36,19 +35,16 @@ def connect():
 
     # First try the existing server.
     try:
-        print(f"Connecting to existing LibreOffice at {URL}")
         return resolver.resolve(URL)
     except Exception:
         print("No existing LibreOffice server found.")
 
     # Start one.
-    print("Starting LibreOffice...")
     _soffice_process()
 
     # Wait until the socket is actually ready.
     for i in range(50):
         try:
-            print(f"Attempt {i + 1}: connecting...")
             return resolver.resolve(URL)
         except Exception:
             time.sleep(1)

@@ -1,0 +1,14 @@
+loaders:
+  - type: python
+    search_path:
+      - ../calc
+    modules:
+      - workbook
+      - sheet
+      - cells
+      - soffice
+
+renderer:
+  type: markdown
+  filename: docs/api.md
+  render_toc: true
