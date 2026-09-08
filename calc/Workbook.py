@@ -5,8 +5,9 @@ from .Sheet import Sheet
 
 
 class Workbook:
+    """Wrapper around a LibreOffice Calc Workbook."""
+
     def __init__(self, path=None):
-        """Wrapper around a LibreOffice Calc Workbook."""
         self.ctx = connect()
         self.desktop = self.ctx.ServiceManager.createInstanceWithContext(
             "com.sun.star.frame.Desktop", self.ctx

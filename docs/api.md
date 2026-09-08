@@ -2,7 +2,6 @@
 
 * [workbook](#workbook)
   * [Workbook](#workbook.Workbook)
-    * [\_\_init\_\_](#workbook.Workbook.__init__)
 * [sheet](#sheet)
   * [Sheet](#sheet.Sheet)
     * [uno](#sheet.Sheet.uno)
@@ -35,14 +34,6 @@
 
 ```python
 class Workbook()
-```
-
-<a id="workbook.Workbook.__init__"></a>
-
-#### \_\_init\_\_
-
-```python
-def __init__(path=None)
 ```
 
 Wrapper around a LibreOffice Calc Workbook.
