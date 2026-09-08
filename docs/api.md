@@ -1,6 +1,8 @@
 # Table of Contents
 
 * [workbook](#workbook)
+  * [Workbook](#workbook.Workbook)
+    * [\_\_init\_\_](#workbook.Workbook.__init__)
 * [sheet](#sheet)
   * [Sheet](#sheet.Sheet)
     * [uno](#sheet.Sheet.uno)
@@ -21,10 +23,29 @@
     * [set\_enum](#cells.Cells.set_enum)
     * [autofit\_columns](#cells.Cells.autofit_columns)
 * [soffice](#soffice)
+  * [connect](#soffice.connect)
 
 <a id="workbook"></a>
 
 # workbook
+
+<a id="workbook.Workbook"></a>
+
+## Workbook Objects
+
+```python
+class Workbook()
+```
+
+<a id="workbook.Workbook.__init__"></a>
+
+#### \_\_init\_\_
+
+```python
+def __init__(path=None)
+```
+
+Wrapper around a LibreOffice Calc Workbook.
 
 <a id="sheet"></a>
 
@@ -210,4 +231,14 @@ Autofit columns in the range.
 <a id="soffice"></a>
 
 # soffice
+
+<a id="soffice.connect"></a>
+
+#### connect
+
+```python
+def connect()
+```
+
+Connect to existing soffice or create one and try to connect to it
 

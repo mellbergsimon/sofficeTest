@@ -9,6 +9,7 @@ URL = f"uno:socket,host=127.0.0.1,port={PORT};" "urp;StarOffice.ComponentContext
 
 
 def _soffice_process():
+    """Actual soffice subprocess started from python"""
     return subprocess.Popen(
         [
             SOFFICE,
@@ -24,6 +25,7 @@ def _soffice_process():
 
 
 def connect():
+    """Connect to existing soffice or create one and try to connect to it"""
     import uno
 
     local = uno.getComponentContext()
