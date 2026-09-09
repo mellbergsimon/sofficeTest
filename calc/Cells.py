@@ -11,8 +11,7 @@ class Cells:
         self.rows = self._raw.getRows()
         self.cols = self._raw.getColumns()
 
-    @property
-    def uno(self):
+    def _raw(self):
         """Return the raw uno representation of the cells"""
         return self._raw
 
@@ -149,6 +148,40 @@ class Cells:
         validation.ShowList = 1
 
         cells.setPropertyValue("Validation", validation)
+        return self
+
+    def select(self):
+        """
+        Select the current cell range
+        """
+        controller = self.sheet.workbook.controller
+
+        controller.setActiveSheet(self.sheet._raw())
+        controller.select(self._raw)
+        return self
+
+    def set_left_border(self, color=0x00B050):
+        """
+        Set the left border of a cell range.
+        """
+        cells = self._raw
+
+        border = cells.getPropertyValue("TableBorder2")
+
+        line = uno.createUnoStruct("com.sun.star.table.BorderLine2")
+
+        line.Color = color
+        line.OuterLineWidth = 20
+        line.InnerLineWidth = 0
+        line.LineDistance = 0
+
+        border.LeftLine = line
+        border.IsLeftLineValid = True
+
+        cells.setPropertyValue(
+            "TableBorder2",
+            border,
+        )
         return self
 
     def autofit_columns(self, min_width=2000):

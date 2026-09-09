@@ -7,14 +7,51 @@ from .Sheet import Sheet
 class Workbook:
     """Wrapper around a LibreOffice Calc Workbook."""
 
-    def __init__(self, path=None):
+    def __init__(self, path="Untitled"):
         self.ctx = connect()
         self.desktop = self.ctx.ServiceManager.createInstanceWithContext(
             "com.sun.star.frame.Desktop", self.ctx
         )
 
-        isNew = False
+        self.path = Path(path).absolute()
+        self._ensure_extension()
+
         # Load or create a new spreadsheet
+        self._open()
+        self.window = self.doc.getCurrentController().getFrame().getContainerWindow()
+
+        # Hide by default
+        self.hide()
+        self.controller = self.doc.getCurrentController()
+
+    @property
+    def name(self):
+        return self.path.name
+
+    def rename(self, new_name):
+        """rename deletes the old if it exists and saves the new name"""
+        old_name = self.path
+        self.path = new_name
+        self._ensure_extension()
+        self.save_as(new_name)
+
+        # Delete old name
+        if old_name.exists():
+            old_name.unlink()
+
+    def sheets(self):
+        sheets = self.doc.getSheets()
+        return [self.sheet(sheet.getName()) for sheet in sheets]
+
+    def _ensure_extension(self):
+        if self.path.suffix:
+            return self.path
+
+        return self.path.with_suffix(".xlsm")
+
+    def _open(self):
+        path = self.path
+        hidden = self.prop("Hidden", True)
         if path and Path(path).exists():
             url = uno.systemPathToFileUrl(str(Path(path).absolute()))
 
@@ -22,42 +59,22 @@ class Workbook:
                 url,
                 "_default",
                 0,
-                (),
+                (hidden,),
             )
         else:
-            isNew = True
             self.doc = self.desktop.loadComponentFromURL(
                 "private:factory/scalc",
                 "_default",
                 0,
-                (),
+                (hidden,),
             )
-        self.window = self.doc.getCurrentController().getFrame().getContainerWindow()
-
-        if isNew:
-            self.window.setVisible(False)
-
-        self.controller = self.doc.getCurrentController()
-        self.path = Path(path).absolute() if path else None
-
-    @property
-    def name(self):
-        return self.path.name
+        return self
 
     def show(self):
         self.window.setVisible(True)
-        import subprocess
-
-        subprocess.run(
-            [
-                "osascript",
-                "-e",
-                'tell application "LibreOffice" to activate',
-            ],
-            check=False,
-        )
 
         self.window.setFocus()
+        return self
 
     def sheet(self, name=None):
         sheets = self.doc.getSheets()
@@ -90,6 +107,7 @@ class Workbook:
         if new_name in sheets.getElementNames():
             raise ValueError(f"Sheet '{new_name}' already exists.")
         sheets.getByName(old_name).setName(new_name)
+        return self.sheet(new_name)
 
     def delete_sheets(self, names):
         sheets = self.doc.getSheets()
@@ -100,12 +118,17 @@ class Workbook:
 
     def hide(self):
         self.window.setVisible(False)
+        return self
 
     def save(self):
-        self.doc.store()
+        self.save_as()
+        return self
 
-    def save_as(self, path, extension="xlsm"):
-        path = Path(path).absolute()
+    def save_as(self, path=None, extension="xlsm"):
+        if path is not None:
+            self.path = path
+
+        extension = extension.strip(".")
 
         match (extension.lower()):
             case "xlsm":
@@ -117,13 +140,18 @@ class Workbook:
             case _:
                 raise ValueError(f"Unsupported extension: {extension}")
 
+        # Check if extension matches the saved one. Otherwise switch to the new and save
+        if self.path.suffix.strip(".") != extension:
+            self.path = self.path.with_suffix("." + extension)
+
         self.doc.storeAsURL(
-            uno.systemPathToFileUrl(str(path)),
+            uno.systemPathToFileUrl(str(self.path)),
             (
                 self.prop("FilterName", filter_name),
                 self.prop("Overwrite", True),
             ),
         )
+        return self
 
     @staticmethod
     def prop(name, value):
@@ -132,5 +160,10 @@ class Workbook:
         p.Value = value
         return p
 
+    def start(self):
+        self._open()
+        return self
+
     def close(self):
         self.doc.close(True)
+        return self

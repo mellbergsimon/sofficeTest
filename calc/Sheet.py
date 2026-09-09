@@ -9,11 +9,13 @@ class Sheet:
         self.workbook = workbook
         self.sheet = sheet
 
-    @property
     def name(self):
         return self.sheet.getName()
 
-    def uno(self):
+    def path_str(self):
+        return str(self.path)
+
+    def _raw(self):
         """Get the raw uno class representation"""
         return self.sheet
 
@@ -30,45 +32,6 @@ class Sheet:
 
         self.workbook.controller.setActiveSheet(self.sheet)
         self.workbook.show()
-        return self
-
-    def select(self, cell):
-        """
-        Select a cell or range of cells in the sheet and make it active.
-
-        Show must be called after this to make the selection visible for the user.
-        """
-
-        controller = self.workbook.controller
-
-        controller.setActiveSheet(self.sheet)
-
-        cell_range = self.sheet.getCellRangeByName(cell)
-        controller.select(cell_range)
-        return self
-
-    def set_left_border(self, cell_range, color=0x00B050):
-        """
-        Set the left border of a cell range.
-        """
-        cells = self.sheet.getCellRangeByName(cell_range)
-
-        border = cells.getPropertyValue("TableBorder2")
-
-        line = uno.createUnoStruct("com.sun.star.table.BorderLine2")
-
-        line.Color = color
-        line.OuterLineWidth = 20
-        line.InnerLineWidth = 0
-        line.LineDistance = 0
-
-        border.LeftLine = line
-        border.IsLeftLineValid = True
-
-        cells.setPropertyValue(
-            "TableBorder2",
-            border,
-        )
         return self
 
     def delete(self):
